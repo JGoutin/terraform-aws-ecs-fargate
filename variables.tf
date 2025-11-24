@@ -356,3 +356,9 @@ variable "kms_policy_dependency" {
   type        = list(any)
   default     = []
 }
+
+variable "assign_public_ip" {
+  description = "Assign a public IP address to the ENI."
+  type        = bool
+  default     = null
+}

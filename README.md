@@ -296,7 +296,7 @@ Key outputs for integration:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_kms_key"></a> [kms\_key](#module\_kms\_key) | ../module-kms-key | n/a |
+| <a name="module_kms_key"></a> [kms\_key](#module\_kms\_key) | JGoutin/kms-key/aws | ~> 1.0 |
 
 ## Resources
 
@@ -362,6 +362,7 @@ Key outputs for integration:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_alarms_enabled"></a> [alarms\_enabled](#input\_alarms\_enabled) | Enable CloudWatch alarms. This should be set to true if sns\_topic\_arn is provided. | `bool` | `false` | no |
+| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Assign a public IP address to the ENI. | `bool` | `null` | no |
 | <a name="input_autoscaling_alb_resource_label"></a> [autoscaling\_alb\_resource\_label](#input\_autoscaling\_alb\_resource\_label) | ALB resource label for request-based scaling (format: app/load-balancer-name/xxx/targetgroup/target-group-name/yyy). Required if autoscaling\_alb\_target\_requests\_per\_target is set. | `string` | `null` | no |
 | <a name="input_autoscaling_alb_target_requests_per_target"></a> [autoscaling\_alb\_target\_requests\_per\_target](#input\_autoscaling\_alb\_target\_requests\_per\_target) | Target number of ALB requests per ECS task for auto-scaling. If null, request-based scaling is disabled. | `number` | `null` | no |
 | <a name="input_autoscaling_cpu_target_percent"></a> [autoscaling\_cpu\_target\_percent](#input\_autoscaling\_cpu\_target\_percent) | Percent of CPU to use as target for autoscaling. If null, uses AWS default. | `number` | `null` | no |

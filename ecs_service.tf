@@ -33,8 +33,9 @@ resource "aws_ecs_service" "main" {
     weight            = var.autoscaling_spot_percent
   }
   network_configuration {
-    subnets         = var.subnets_ids
-    security_groups = concat([aws_security_group.main.id], var.security_group_ids)
+    subnets          = var.subnets_ids
+    security_groups  = concat([aws_security_group.main.id], var.security_group_ids)
+    assign_public_ip = var.assign_public_ip
   }
   dynamic "load_balancer" {
     for_each = merge([
