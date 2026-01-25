@@ -29,7 +29,10 @@ resource "aws_ecs_cluster" "main" {
     name  = "containerInsights"
     value = var.container_insight
   }
-  depends_on = [module.kms_key.policy_dependency]
+  depends_on = [
+    module.kms_key.policy_dependency,
+    aws_cloudwatch_log_group.container_insight
+  ]
 }
 
 resource "aws_ecs_cluster_capacity_providers" "main" {
