@@ -15,7 +15,7 @@ locals {
 resource "aws_efs_file_system" "mount_points" {
   count            = local.mount_points_efs_count
   encrypted        = "true"
-  kms_key_id       = module.kms_key.id
+  kms_key_id       = module.kms_key.arn
   tags             = { "Name" = local.mount_points_efs_name }
   performance_mode = var.mount_points_performance_mode
   throughput_mode  = var.mount_points_throughput_mode
@@ -25,6 +25,8 @@ resource "aws_efs_file_system" "mount_points" {
   )
   lifecycle_policy {
     transition_to_ia                    = "AFTER_30_DAYS"
+  }
+  lifecycle_policy {
     transition_to_primary_storage_class = "AFTER_1_ACCESS"
   }
 }
@@ -34,7 +36,7 @@ resource "aws_efs_access_point" "mount_points" {
   file_system_id = aws_efs_file_system.mount_points[0].id
   tags           = { "Name" = "${local.mount_points_efs_name}-${each.key}" }
   root_directory {
-    path = each.key
+    path = "/${each.key}"
     creation_info {
       permissions = "777"
       owner_gid   = 0
@@ -44,9 +46,9 @@ resource "aws_efs_access_point" "mount_points" {
 }
 
 resource "aws_efs_mount_target" "mount_points" {
-  for_each        = toset(local.mount_points_efs_enabled ? var.subnets_ids : [])
+  count           = local.mount_points_efs_enabled ? length(var.subnets_ids) : 0
   file_system_id  = aws_efs_file_system.mount_points[0].id
-  subnet_id       = each.key
+  subnet_id       = var.subnets_ids[count.index]
   security_groups = [aws_security_group.mount_points[0].id]
 }
 
@@ -105,7 +107,6 @@ resource "aws_backup_plan" "mount_points" {
     rule_name                = "hourly_backup"
     target_vault_name        = aws_backup_vault.mount_points[0].name
     schedule                 = "cron(0 * ? * * *)" # Every hour
-    enable_continuous_backup = true
 
     dynamic "lifecycle" {
       for_each = var.mount_points_backup_retention_days != null ? [1] : []
