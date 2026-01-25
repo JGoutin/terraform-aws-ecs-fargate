@@ -65,6 +65,16 @@ data "aws_iam_policy_document" "task_role" {
     }
   }
   dynamic "statement" {
+    for_each = toset(var.enable_execute_command ? [1] : [])
+    content {
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+      ]
+      resources = [module.kms_key.arn]
+    }
+  }
+  dynamic "statement" {
     for_each = toset(local.mount_points_efs_enabled ? [1] : [])
     content {
       actions = [
