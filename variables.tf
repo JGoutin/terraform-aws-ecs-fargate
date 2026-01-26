@@ -362,3 +362,11 @@ variable "assign_public_ip" {
   type        = bool
   default     = null
 }
+
+# Other
+
+variable "deletion_protection" {
+  description = "If true, enable deletion protection on eligible resources."
+  type        = bool
+  default     = false
+}

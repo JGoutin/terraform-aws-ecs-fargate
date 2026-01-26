@@ -93,10 +93,11 @@ data "aws_iam_policy_document" "backup_assume_role" {
 }
 
 resource "aws_backup_vault" "mount_points" {
-  count       = local.mount_points_efs_enabled && var.mount_points_backup_enable ? 1 : 0
-  name        = local.mount_points_efs_name
-  kms_key_arn = module.kms_key.arn
-  tags        = { "Name" = local.mount_points_efs_name }
+  count         = local.mount_points_efs_enabled && var.mount_points_backup_enable ? 1 : 0
+  name          = local.mount_points_efs_name
+  kms_key_arn   = module.kms_key.arn
+  force_destroy = !var.deletion_protection
+  tags          = { "Name" = local.mount_points_efs_name }
 }
 
 resource "aws_backup_plan" "mount_points" {
