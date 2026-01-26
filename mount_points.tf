@@ -43,6 +43,7 @@ resource "aws_efs_access_point" "mount_points" {
       owner_uid   = 0
     }
   }
+  depends_on = [aws_efs_mount_target.mount_points]
 }
 
 resource "aws_efs_mount_target" "mount_points" {
