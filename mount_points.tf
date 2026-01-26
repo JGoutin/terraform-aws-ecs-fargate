@@ -24,7 +24,7 @@ resource "aws_efs_file_system" "mount_points" {
     var.mount_points_provisioned_throughput_in_mibps : null
   )
   lifecycle_policy {
-    transition_to_ia                    = "AFTER_30_DAYS"
+    transition_to_ia = "AFTER_30_DAYS"
   }
   lifecycle_policy {
     transition_to_primary_storage_class = "AFTER_1_ACCESS"
@@ -106,9 +106,9 @@ resource "aws_backup_plan" "mount_points" {
   name  = local.mount_points_efs_name
 
   rule {
-    rule_name                = "hourly_backup"
-    target_vault_name        = aws_backup_vault.mount_points[0].name
-    schedule                 = "cron(0 * ? * * *)" # Every hour
+    rule_name         = "hourly_backup"
+    target_vault_name = aws_backup_vault.mount_points[0].name
+    schedule          = "cron(0 * ? * * *)" # Every hour
 
     dynamic "lifecycle" {
       for_each = var.mount_points_backup_retention_days != null ? [1] : []
