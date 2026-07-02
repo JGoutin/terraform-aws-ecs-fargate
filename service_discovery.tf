@@ -10,6 +10,7 @@ locals {
 resource "aws_service_discovery_service" "main" {
   count = local.service_registries_enabled ? 1 : 0
   name  = var.service_discovery_dns_name != null ? var.service_discovery_dns_name : local.name
+  tags  = var.tags
   dns_config {
     namespace_id   = var.service_discovery_dns_namespace_id
     routing_policy = "MULTIVALUE"

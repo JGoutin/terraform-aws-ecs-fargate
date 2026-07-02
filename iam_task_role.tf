@@ -8,7 +8,7 @@ locals {
 
 resource "aws_iam_role" "task_role" {
   name               = local.task_role_name
-  tags               = { Name = local.task_role_name }
+  tags               = merge(local.tags, { Name = local.task_role_name })
   assume_role_policy = data.aws_iam_policy_document.tasks_role_assume.json
 }
 
@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "task_role" {
 resource "aws_iam_policy" "task_role" {
   count  = local.task_role_policy_count
   name   = local.task_role_name
-  tags   = { Name = local.task_role_name }
+  tags   = merge(local.tags, { Name = local.task_role_name })
   policy = data.aws_iam_policy_document.task_role[0].json
 }
 

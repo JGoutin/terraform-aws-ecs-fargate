@@ -273,7 +273,7 @@ Key outputs for integration:
 ## Requirements
 
 - **Terraform/OpenTofu**: >= 1.5.0
-- **AWS Provider**: >= 5.0
+- **AWS Provider**: >= 6.27.0
 - **VPC**: Existing VPC with subnets
 - **Container Image**: Accessible from ECS (ECR, Docker Hub, etc.)
 
@@ -285,26 +285,26 @@ Key outputs for integration:
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >=5 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.27.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >=5 |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.27.0 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
-| <a name="module_kms_key"></a> [kms\_key](#module\_kms\_key) | JGoutin/kms-key/aws | ~> 1.0 |
+| ---- | ------ | ------- |
+| <a name="module_kms_key"></a> [kms\_key](#module\_kms\_key) | JGoutin/kms-key/aws | ~> 1.2 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_appautoscaling_policy.alb_requests](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_policy) | resource |
 | [aws_appautoscaling_policy.cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_policy) | resource |
 | [aws_appautoscaling_policy.memory](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_policy) | resource |
@@ -363,7 +363,7 @@ Key outputs for integration:
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alarms_enabled"></a> [alarms\_enabled](#input\_alarms\_enabled) | Enable CloudWatch alarms. This should be set to true if sns\_topic\_arn is provided. | `bool` | `false` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Assign a public IP address to the ENI. | `bool` | `null` | no |
 | <a name="input_autoscaling_alb_resource_label"></a> [autoscaling\_alb\_resource\_label](#input\_autoscaling\_alb\_resource\_label) | ALB resource label for request-based scaling (format: app/load-balancer-name/xxx/targetgroup/target-group-name/yyy). Required if autoscaling\_alb\_target\_requests\_per\_target is set. | `string` | `null` | no |
@@ -408,13 +408,14 @@ Key outputs for integration:
 | <a name="input_service_discovery_http_namespace_arn"></a> [service\_discovery\_http\_namespace\_arn](#input\_service\_discovery\_http\_namespace\_arn) | If specified, enable Service connect on the ECS service and attach it to this namespace. | `string` | `null` | no |
 | <a name="input_sns_topic_arn"></a> [sns\_topic\_arn](#input\_sns\_topic\_arn) | SNS topic ARN for CloudWatch alarms. If specified, CloudWatch alarms will be created for high memory usage and unhealthy containers. | `string` | `null` | no |
 | <a name="input_subnets_ids"></a> [subnets\_ids](#input\_subnets\_ids) | Subnets where to deploy the service. | `list(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Additional tags to apply to created resources. | `map(string)` | `null` | no |
 | <a name="input_task_role_policies"></a> [task\_role\_policies](#input\_task\_role\_policies) | List of extra IAM policies ARNs to attach to the task role. | `list(string)` | `[]` | no |
 | <a name="input_triggers"></a> [triggers](#input\_triggers) | Map of arbitrary keys and values that, when changed, will trigger an in-place update (redeployment). | `map(string)` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cloudwatch_log_groups_names"></a> [cloudwatch\_log\_groups\_names](#output\_cloudwatch\_log\_groups\_names) | Log group names for each containers. |
 | <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | ECS cluster name. |
 | <a name="output_ecs_service_name"></a> [ecs\_service\_name](#output\_ecs\_service\_name) | ECS service name. |

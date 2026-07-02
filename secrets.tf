@@ -20,4 +20,5 @@ resource "aws_ssm_parameter" "main" {
   key_id   = module.kms_key.id
   type     = "SecureString"
   tier     = "Intelligent-Tiering"
+  tags     = var.tags
 }

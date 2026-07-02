@@ -9,7 +9,7 @@ locals {
 resource "aws_security_group" "main" {
   name        = local.security_group_name
   description = local.security_group_name
-  tags        = { "Name" = local.security_group_name }
+  tags        = merge(local.tags, { "Name" = local.security_group_name })
   vpc_id      = local.vpc_id
 }
 
@@ -24,6 +24,7 @@ resource "aws_vpc_security_group_ingress_rule" "main" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "main" {
@@ -37,6 +38,7 @@ resource "aws_vpc_security_group_egress_rule" "main" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }
 
 /*
@@ -51,6 +53,7 @@ resource "aws_vpc_security_group_egress_rule" "connect_egress" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "connect_egress" {
@@ -61,6 +64,7 @@ resource "aws_vpc_security_group_ingress_rule" "connect_egress" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }
 
 /*
@@ -75,6 +79,7 @@ resource "aws_vpc_security_group_ingress_rule" "connect_ingress" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "connect_ingress" {
@@ -85,4 +90,5 @@ resource "aws_vpc_security_group_egress_rule" "connect_ingress" {
   from_port                    = each.value.from_port
   to_port                      = coalesce(each.value.to_port, each.value.from_port)
   ip_protocol                  = each.value.protocol
+  tags                         = var.tags
 }

@@ -16,7 +16,7 @@ resource "aws_efs_file_system" "mount_points" {
   count            = local.mount_points_efs_count
   encrypted        = "true"
   kms_key_id       = module.kms_key.arn
-  tags             = { "Name" = local.mount_points_efs_name }
+  tags             = merge(local.tags, { "Name" = local.mount_points_efs_name })
   performance_mode = var.mount_points_performance_mode
   throughput_mode  = var.mount_points_throughput_mode
   provisioned_throughput_in_mibps = (
@@ -34,7 +34,7 @@ resource "aws_efs_file_system" "mount_points" {
 resource "aws_efs_access_point" "mount_points" {
   for_each       = local.mount_points_efs
   file_system_id = aws_efs_file_system.mount_points[0].id
-  tags           = { "Name" = "${local.mount_points_efs_name}-${each.key}" }
+  tags           = merge(local.tags, { "Name" = "${local.mount_points_efs_name}-${each.key}" })
   root_directory {
     path = "/${each.key}"
     creation_info {
@@ -58,7 +58,7 @@ resource "aws_security_group" "mount_points" {
   name        = local.mount_points_efs_name
   description = local.mount_points_efs_name
   vpc_id      = local.vpc_id
-  tags        = { "Name" = local.mount_points_efs_name }
+  tags        = merge(local.tags, { "Name" = local.mount_points_efs_name })
 }
 
 resource "aws_vpc_security_group_ingress_rule" "mount_points" {
@@ -69,6 +69,7 @@ resource "aws_vpc_security_group_ingress_rule" "mount_points" {
   ip_protocol                  = "tcp"
   from_port                    = 2049
   to_port                      = 2049
+  tags                         = var.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "mount_points" {
@@ -79,6 +80,7 @@ resource "aws_vpc_security_group_egress_rule" "mount_points" {
   ip_protocol                  = "tcp"
   from_port                    = 2049
   to_port                      = 2049
+  tags                         = var.tags
 }
 
 # AWS Backup Configuration
@@ -98,7 +100,7 @@ resource "aws_backup_vault" "mount_points" {
   name          = local.mount_points_efs_name
   kms_key_arn   = module.kms_key.arn
   force_destroy = !var.deletion_protection
-  tags          = { "Name" = local.mount_points_efs_name }
+  tags          = merge(local.tags, { "Name" = local.mount_points_efs_name })
 }
 
 resource "aws_backup_plan" "mount_points" {
@@ -118,7 +120,7 @@ resource "aws_backup_plan" "mount_points" {
     }
   }
 
-  tags = { "Name" = local.mount_points_efs_name }
+  tags = merge(local.tags, { "Name" = local.mount_points_efs_name })
 }
 
 resource "aws_backup_selection" "mount_points" {
@@ -136,7 +138,7 @@ resource "aws_iam_role" "backup_role" {
   count              = local.mount_points_efs_enabled && var.mount_points_backup_enable ? 1 : 0
   name               = "${local.mount_points_efs_name}-backup"
   assume_role_policy = data.aws_iam_policy_document.backup_assume_role.json
-  tags               = { "Name" = "${local.mount_points_efs_name}-backup" }
+  tags               = merge(local.tags, { "Name" = "${local.mount_points_efs_name}-backup" })
 }
 
 resource "aws_iam_role_policy_attachment" "backup_role" {

@@ -6,6 +6,7 @@ CloudWatch Alarms for ECS Service monitoring
 resource "aws_cloudwatch_metric_alarm" "high_memory" {
   for_each            = var.alarms_enabled ? toset(["enabled"]) : toset([])
   alarm_name          = "${local.name}-high-memory"
+  tags                = var.tags
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 4
@@ -28,6 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "high_memory" {
 resource "aws_cloudwatch_metric_alarm" "unhealthy_containers" {
   for_each            = var.alarms_enabled ? toset(["enabled"]) : toset([])
   alarm_name          = "${local.name}-unhealthy-containers"
+  tags                = var.tags
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 4
@@ -51,6 +53,7 @@ resource "aws_cloudwatch_metric_alarm" "unhealthy_containers" {
 resource "aws_cloudwatch_metric_alarm" "cpu_anomaly" {
   for_each                  = var.alarms_enabled ? toset(["enabled"]) : toset([])
   alarm_name                = "${local.name}-cpu-anomaly"
+  tags                      = var.tags
   comparison_operator       = "GreaterThanUpperThreshold"
   evaluation_periods        = 5
   datapoints_to_alarm       = 4
@@ -88,6 +91,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_anomaly" {
 resource "aws_cloudwatch_metric_alarm" "max_capacity_reached" {
   for_each            = var.alarms_enabled && local.autoscaling_min_capacity != local.autoscaling_max_capacity && var.container_insight != "disabled" ? toset(["enabled"]) : toset([])
   alarm_name          = "${local.name}-max-capacity-reached"
+  tags                = var.tags
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 5
   datapoints_to_alarm = 4

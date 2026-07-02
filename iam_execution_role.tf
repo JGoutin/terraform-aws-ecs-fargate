@@ -8,13 +8,13 @@ locals {
 
 resource "aws_iam_role" "execution_role" {
   name               = local.execution_role_name
-  tags               = { Name = local.execution_role_name }
+  tags               = merge(local.tags, { Name = local.execution_role_name })
   assume_role_policy = data.aws_iam_policy_document.tasks_role_assume.json
 }
 
 resource "aws_iam_policy" "execution_role" {
   name   = local.execution_role_name
-  tags   = { Name = local.execution_role_name }
+  tags   = merge(local.tags, { Name = local.execution_role_name })
   policy = data.aws_iam_policy_document.execution_role.json
 }
 

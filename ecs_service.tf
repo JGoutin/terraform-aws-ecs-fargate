@@ -9,6 +9,7 @@ resource "aws_ecs_service" "main" {
   desired_count                      = local.autoscaling_min_capacity
   health_check_grace_period_seconds  = var.health_check_grace_period_seconds
   propagate_tags                     = "TASK_DEFINITION"
+  tags                               = var.tags
   deployment_minimum_healthy_percent = 100
   enable_execute_command             = var.enable_execute_command ? true : null
   triggers = merge(var.triggers, {
@@ -101,6 +102,7 @@ resource "aws_ecs_task_definition" "main" {
   cpu                      = var.cpu * 1024
   memory                   = var.memory
   network_mode             = "awsvpc"
+  tags                     = var.tags
   runtime_platform {
     cpu_architecture        = var.cpu_architecture
     operating_system_family = "LINUX"

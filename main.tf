@@ -6,6 +6,9 @@ locals {
   # Resources names
   name = "${var.name_prefix}-${data.aws_region.current.name}"
 
+  # Tags to merge into resources that already carry a Name tag
+  tags = coalesce(var.tags, {})
+
   # Port mapping for load balancer & service discovery attachment
   port_mappings = nonsensitive(tomap(merge([for container_name, definition in var.container_definitions : {
     for port_name, port_mapping in coalesce(definition.port_mappings, {}) : "${container_name}_${port_name}" => {
@@ -41,10 +44,11 @@ KMS key
 
 module "kms_key" {
   source  = "JGoutin/kms-key/aws"
-  version = "~> 1.0"
+  version = "~> 1.2"
 
   id                    = var.kms_key_id
   name_prefix           = var.name_prefix
+  tags                  = local.tags
   policy_documents_json = [data.aws_iam_policy_document.execution_kms_policy.json]
   policy_dependency     = var.kms_policy_dependency
 }

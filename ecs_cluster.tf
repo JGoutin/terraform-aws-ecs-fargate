@@ -8,7 +8,7 @@ locals {
 
 resource "aws_ecs_cluster" "main" {
   name = local.cluster_name
-  tags = { "Name" = local.cluster_name }
+  tags = merge(local.tags, { "Name" = local.cluster_name })
   configuration {
     dynamic "execute_command_configuration" {
       for_each = toset(var.enable_execute_command ? [1] : [])

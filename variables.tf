@@ -370,3 +370,9 @@ variable "deletion_protection" {
   type        = bool
   default     = false
 }
+
+variable "tags" {
+  description = "Additional tags to apply to created resources."
+  type        = map(string)
+  default     = null
+}
