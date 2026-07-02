@@ -63,7 +63,7 @@ resource "aws_ecs_service" "main" {
       log_configuration {
         log_driver = "awslogs"
         options = {
-          awslogs-region        = data.aws_region.current.name
+          awslogs-region        = data.aws_region.current.region
           awslogs-group         = aws_cloudwatch_log_group.service.name
           awslogs-stream-prefix = "${local.name}-"
         }
@@ -167,7 +167,7 @@ resource "aws_ecs_task_definition" "main" {
           logDriver = "awslogs"
           options = merge(
             {
-              awslogs-region        = data.aws_region.current.name
+              awslogs-region        = data.aws_region.current.region
               awslogs-group         = aws_cloudwatch_log_group.container[definition_name].name
               awslogs-stream-prefix = "${local.name}-${definition_name}-"
             },

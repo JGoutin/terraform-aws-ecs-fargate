@@ -97,7 +97,7 @@ data "aws_iam_policy_document" "tasks_role_assume" {
     }
     condition {
       test     = "ArnLike"
-      values   = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+      values   = ["arn:aws:ecs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:*"]
       variable = "aws:SourceArn"
     }
     condition {

@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "execution_role" {
     resources = [module.kms_key.arn]
     /*condition {
       test     = "StringEquals"
-      values   = ["logs.${data.aws_region.current.name}.amazonaws.com"]
+      values   = ["logs.${data.aws_region.current.region}.amazonaws.com"]
       variable = "kms:ViaService"
     }*/
   }
@@ -98,7 +98,7 @@ data "aws_iam_policy_document" "execution_kms_policy" {
     sid = "Allow ECS logs"
     principals {
       type        = "Service"
-      identifiers = ["logs.${data.aws_region.current.name}.amazonaws.com"]
+      identifiers = ["logs.${data.aws_region.current.region}.amazonaws.com"]
     }
     actions = [
       "kms:Encrypt",
@@ -112,7 +112,7 @@ data "aws_iam_policy_document" "execution_kms_policy" {
     condition {
       test     = "ArnLike"
       variable = "kms:EncryptionContext:aws:logs:arn"
-      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.name}-*"]
+      values   = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:${local.name}-*"]
     }
     condition {
       test     = "StringEquals"

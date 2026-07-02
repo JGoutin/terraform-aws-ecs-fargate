@@ -4,7 +4,7 @@ Configuration
 
 locals {
   # Resources names
-  name = "${var.name_prefix}-${data.aws_region.current.name}"
+  name = "${var.name_prefix}-${data.aws_region.current.region}"
 
   # Tags to merge into resources that already carry a Name tag
   tags = coalesce(var.tags, {})
