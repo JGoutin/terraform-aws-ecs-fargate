@@ -1,5 +1,8 @@
 # AWS ECS Fargate Deployment Module
 
+[![Terraform Module](https://img.shields.io/badge/Terraform-ECS%20Fargate%20module-844FBA?logo=terraform&logoColor=ffffff)](https://registry.terraform.io/modules/jgoutin/ecs-fargate/aws/latest)
+[![OpenTofu Module](https://img.shields.io/badge/OpenTofu-ECS%20Fargate%20module-FFDA18?logo=opentofu&logoColor=ffffff)](https://search.opentofu.org/module/jgoutin/ecs-fargate/aws/latest)
+
 Comprehensive Terraform module for deploying and managing containerized applications on AWS ECS Fargate with auto-scaling, monitoring, and production-grade features.
 
 ## Overview
