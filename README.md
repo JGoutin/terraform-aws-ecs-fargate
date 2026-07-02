@@ -52,13 +52,12 @@ This module provides a complete ECS Fargate deployment solution with built-in au
 module "ecs_service" {
   source = "JGoutin/ecs-fargate/aws"
   
-  name           = "my-app"
-  vpc_id         = "vpc-xxxxx"
-  subnet_ids     = ["subnet-1", "subnet-2"]
-  container_image = "nginx:latest"
+  name_prefix = "my-app"
+  subnets_ids = ["subnet-1", "subnet-2"]
   
   container_definitions = {
     main = {
+      image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app:latest"
       port_mappings = {
         http = { container_port = 80 }
       }
@@ -71,19 +70,18 @@ module "ecs_service" {
 
 ```hcl
 module "ecs_service" {
-  source = "JGoutin/ecs-fargate/aws""
+  source = "JGoutin/ecs-fargate/aws"
   
-  name       = "my-app-prod"
-  vpc_id     = "vpc-xxxxx"
-  subnet_ids = ["subnet-a", "subnet-b", "subnet-c"]
+  name_prefix = "my-app-prod"
+  subnets_ids = ["subnet-a", "subnet-b", "subnet-c"]
   
   # Container Configuration
-  container_image = "my-app:v1.2.3"
-  cpu             = 2     # 2 vCPU
-  memory          = 4096  # 4 GB
+  cpu    = 2     # 2 vCPU
+  memory = 4096  # 4 GB
   
   container_definitions = {
     main = {
+      image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app:v1.2.3"
       port_mappings = {
         http = { container_port = 8080 }
       }
@@ -91,24 +89,24 @@ module "ecs_service" {
         ENV = "production"
       }
       health_check = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-        interval    = 30
-        timeout     = 5
-        retries     = 3
+        command      = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+        interval     = 30
+        timeout      = 5
+        retries      = 3
         start_period = 60
       }
     }
   }
   
   # Auto-scaling
-  autoscaling_enabled      = true
-  autoscaling_min_capacity = 3
-  autoscaling_max_capacity = 10
+  autoscaling_min_capacity          = 3
+  autoscaling_max_capacity          = 10
   autoscaling_cpu_target_percent    = 70
   autoscaling_memory_target_percent = 80
   
   # Monitoring
   container_insight = "enhanced"
+  alarms_enabled    = true
   sns_topic_arn     = "arn:aws:sns:us-east-1:123456789012:alerts"
   
   # Service Discovery
@@ -121,26 +119,22 @@ module "ecs_service" {
 
 ```hcl
 module "ecs_service" {
-  source = "JGoutin/ecs-fargate/aws""
+  source = "JGoutin/ecs-fargate/aws"
   
-  name       = "web-app"
-  vpc_id     = "vpc-xxxxx"
-  subnet_ids = ["subnet-1", "subnet-2"]
-  
-  container_image = "my-web-app:latest"
+  name_prefix = "web-app"
+  subnets_ids = ["subnet-1", "subnet-2"]
   
   container_definitions = {
     web = {
+      image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-web-app:latest"
       port_mappings = {
-        http = { container_port = 8080 }
+        http = {
+          container_port    = 8080
+          target_group_arns = [aws_lb_target_group.main.arn]
+        }
       }
     }
   }
-  
-  # ALB Integration
-  alb_target_group_arn = aws_lb_target_group.main.arn
-  alb_container_name   = "web"
-  alb_container_port   = 8080
 }
 ```
 
@@ -260,22 +254,10 @@ Accessible at: `my-service.namespace.local`
 - ✅ **Read-only Root Filesystem** - Optional
 - ✅ **Non-privileged Containers** - Default
 
-## Outputs
-
-Key outputs for integration:
-
-- `ecs_cluster_name` - For AWS CLI/SDK
-- `ecs_service_name` - For monitoring/scaling
-- `security_group_id` - For security group rules
-- `service_discovery_service_name` - For DNS resolution
-- `cloudwatch_log_groups_names` - For log aggregation
-
 ## Requirements
 
-- **Terraform/OpenTofu**: >= 1.5.0
-- **AWS Provider**: >= 6.27.0
 - **VPC**: Existing VPC with subnets
-- **Container Image**: Accessible from ECS (ECR, Docker Hub, etc.)
+- **Container Image**: Accessible from ECS (ECR only — see `container_definitions.*.image`)
 
 ## Security Hub Controls
 
