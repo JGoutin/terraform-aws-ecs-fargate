@@ -100,9 +100,15 @@ variable "mount_points_provisioned_throughput_in_mibps" {
 }
 
 variable "mount_points_backup_enable" {
-  description = "If 'true', enable AWS Backup for mount points."
+  description = "If 'true', enable a custom AWS Backup plan/vault for mount points, independently of var.mount_points_efs_backup_enable (EFS's native backup policy). Security Hub: EFS.2 (EFS volumes should be in backup plans) — default true = pass; setting false fails this control."
   type        = bool
   default     = true
+}
+
+variable "mount_points_efs_backup_enable" {
+  description = "If 'true', enable EFS automatic backups (the file system's native backup policy) for mount points, independently of var.mount_points_backup_enable (the custom AWS Backup plan/vault above). Off by default since it adds cost on top of var.mount_points_backup_enable, which is already enabled by default. Security Hub: EFS.7 (EFS file systems should have automatic backups enabled) — default false = fail; set to true to pass."
+  type        = bool
+  default     = false
 }
 
 variable "mount_points_backup_retention_days" {
@@ -112,13 +118,13 @@ variable "mount_points_backup_retention_days" {
 }
 
 variable "container_insight" {
-  description = "Container insight configuration. Valid values: 'enhanced', 'enabled', 'disabled'. Default to 'enabled'."
+  description = "Container insight configuration. Valid values: 'enhanced', 'enabled', 'disabled'. Default to 'enabled'. Security Hub: ECS.12 (ECS clusters should use Container Insights) — default 'enabled' = pass; setting 'disabled' fails this control."
   type        = string
   default     = "enabled"
 }
 
 variable "cloudwatch_logs_retention_in_days" {
-  description = "Cloudwatch logs retention in days."
+  description = "Cloudwatch logs retention in days. Applies to every log group this module creates (service, per-container, execute-command, and Container Insights performance). Security Hub: CloudWatch.16 (CloudWatch log groups should be retained for a specified time period) requires at least 365 days by default — default 365 = pass; lowering it fails this control."
   type        = number
   default     = 365
 }
@@ -161,7 +167,7 @@ variable "container_definitions" {
     docker_labels = optional(map(string))
     entrypoint    = optional(list(string))
     essential     = optional(bool, true)
-    environment   = optional(map(string)) # Map of environment variable. The map conversion to 'name'/'value' key pairs is automatically handled. null values are ignored.
+    environment   = optional(map(string)) # Map of environment variable. The map conversion to 'name'/'value' key pairs is automatically handled. null values are ignored. Security Hub ECS.8: never put secrets here, use 'secrets' below instead.
     health_check = optional(object({
       command      = list(string)
       timeout      = optional(number)
@@ -191,6 +197,13 @@ variable "container_definitions" {
       container_path = string
       read_only      = optional(bool)
       efs            = optional(bool) # If true, an EFS file-system is automatically created with a mount target for each specified mount point, else ephemeral storage is used.
+      efs_posix_user = optional(object({
+        # Enforces a POSIX user identity on the EFS access point. Only used when 'efs' is true.
+        # Security Hub: EFS.4 (EFS access points should enforce a user identity) — unset = fail; set to pass.
+        uid            = number
+        gid            = number
+        secondary_gids = optional(list(number))
+      }))
     })))
     port_mappings = optional(map(object({
       app_protocol         = optional(string)
@@ -202,13 +215,13 @@ variable "container_definitions" {
       target_group_arns    = optional(list(string)) # Optional target groups ARNs to connect to this port.
     })))
     pseudo_terminal           = optional(bool)
-    read_only_root_filesystem = optional(bool)
+    read_only_root_filesystem = optional(bool) # Security Hub ECS.5 (read-only root filesystems): unset = fail; set to true to pass.
     restart_policy = optional(object({
       enabled                = bool
       ignored_exit_codes     = optional(list(number))
       restart_attempt_period = optional(number)
     }))
-    secrets         = optional(map(string)) # Map of sensitive values to pass as environment variables. The secure storage using SSM parameters is automatically handled.
+    secrets         = optional(map(string)) # Map of sensitive values to pass as environment variables. The secure storage using SSM parameters is automatically handled. Security Hub ECS.8: use this instead of 'environment' for secrets.
     start_timeout   = optional(number)
     stop_timeout    = optional(number)
     system_controls = optional(map(string)) # Map of system controls to set. With namespace as key and value as value. The map conversion to 'namespace'/'value' key pairs is automatically handled.
@@ -217,7 +230,7 @@ variable "container_definitions" {
       hard_limit = number
       soft_limit = optional(number) # Use "hard_limit" value if not specified.
     })))
-    user                = optional(string)
+    user                = optional(string) # Security Hub ECS.20 (non-root user): unset = fail; set to a non-root UID/name to pass.
     version_consistency = optional(bool)
     working_directory   = optional(string)
   }))
@@ -291,7 +304,7 @@ variable "enable_execute_command" {
 
 variable "task_role_policies" {
   type        = list(string)
-  description = "List of extra IAM policies ARNs to attach to the task role."
+  description = "List of extra IAM policies ARNs to attach to the task role. Security Hub: attaching a policy that grants wildcard admin privileges fails IAM.1/IAM.21 — ensure attached policies follow least privilege."
   default     = []
 }
 
@@ -319,7 +332,7 @@ variable "security_group_connect_ingress" {
     referenced_security_group_id = string
     to_port                      = optional(number) # Default to "from_port" value
   }))
-  description = "Add these ingress rules to the ECS service security group. Also add the matching egress rules to the source security groups, allowing them to communicate without extra configuration."
+  description = "Add these ingress rules to the ECS service security group. Also add the matching egress rules to the source security groups, allowing them to communicate without extra configuration. Security groups reference each other here, not CIDRs, so this cannot fail EC2.13/14/53/54."
   default     = {}
 }
 
@@ -338,7 +351,7 @@ variable "security_group_rules_egress" {
 }
 
 variable "security_group_rules_ingress" {
-  description = "Add these ingress rules to the ECS service security group."
+  description = "Add these ingress rules to the ECS service security group. Security Hub: EC2.13/EC2.14/EC2.18/EC2.19/EC2.53/EC2.54 (security groups should not allow unrestricted/admin-port ingress from 0.0.0.0/0 or ::/0) — default {} = pass; an entry with cidr_ipv4 = \"0.0.0.0/0\" or cidr_ipv6 = \"::/0\" (especially covering port 22/3389) fails these controls."
   type = map(object({ # Key is rule description
     cidr_ipv4                    = optional(string)
     cidr_ipv6                    = optional(string)
@@ -358,7 +371,7 @@ variable "kms_policy_dependency" {
 }
 
 variable "assign_public_ip" {
-  description = "Assign a public IP address to the ENI."
+  description = "Assign a public IP address to the ENI. Security Hub: ECS.2 (ECS services should not have public IP addresses assigned to them automatically) — default null (resolves to DISABLED) = pass; setting true fails this control."
   type        = bool
   default     = null
 }
@@ -372,7 +385,7 @@ variable "deletion_protection" {
 }
 
 variable "tags" {
-  description = "Additional tags to apply to created resources."
+  description = "Additional tags to apply to created resources. Security Hub: ECS.13 (services should be tagged) and ECS.15 (task definitions should be tagged) apply this value directly with no fallback — default null fails both; ECS.14 (clusters) always passes regardless. Set tags to pass ECS.13/ECS.15."
   type        = map(string)
   default     = null
 }

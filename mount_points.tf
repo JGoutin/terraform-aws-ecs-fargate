@@ -3,10 +3,13 @@ EFS mount points
 */
 
 locals {
-  mount_points = merge([for config in values(nonsensitive(var.container_definitions)) : {
-    for key, value in coalesce(config.mount_points, {}) : key => coalesce(value.efs, false)
+  mount_points_config = merge([for config in values(nonsensitive(var.container_definitions)) : {
+    for key, value in coalesce(config.mount_points, {}) : key => {
+      efs        = coalesce(value.efs, false)
+      posix_user = value.efs_posix_user
+    }
   }]...)
-  mount_points_efs         = toset([for key, efs in local.mount_points : key if efs])
+  mount_points_efs         = toset([for key, config in local.mount_points_config : key if config.efs])
   mount_points_efs_name    = "${local.name}_mount_points"
   mount_points_efs_enabled = length(local.mount_points_efs) > 0
   mount_points_efs_count   = local.mount_points_efs_enabled ? 1 : 0
@@ -43,7 +46,24 @@ resource "aws_efs_access_point" "mount_points" {
       owner_uid   = 0
     }
   }
+  dynamic "posix_user" {
+    for_each = local.mount_points_config[each.key].posix_user != null ? [local.mount_points_config[each.key].posix_user] : []
+    content {
+      uid            = posix_user.value.uid
+      gid            = posix_user.value.gid
+      secondary_gids = posix_user.value.secondary_gids
+    }
+  }
   depends_on = [aws_efs_mount_target.mount_points]
+}
+
+# Native EFS automatic backups, independent of the custom AWS Backup plan below (var.mount_points_backup_enable).
+resource "aws_efs_backup_policy" "mount_points" {
+  count          = local.mount_points_efs_count
+  file_system_id = aws_efs_file_system.mount_points[0].id
+  backup_policy {
+    status = var.mount_points_efs_backup_enable ? "ENABLED" : "DISABLED"
+  }
 }
 
 resource "aws_efs_mount_target" "mount_points" {

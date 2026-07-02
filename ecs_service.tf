@@ -129,7 +129,7 @@ resource "aws_ecs_task_definition" "main" {
   }
   dynamic "volume" {
     # Ephemeral storage volumes
-    for_each = toset([for key, efs in local.mount_points : key if !efs])
+    for_each = toset([for key, config in local.mount_points_config : key if !config.efs])
     content {
       name = volume.key
     }
